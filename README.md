@@ -24,7 +24,7 @@ Verbosity of the command which goes into the log.
 
 ### saprouter_port
 Port on which the SAP Router will listen.
-- Default: *3299*
+- Default: **3299**
 
 ### saprouter_saprouttab
 Location of saprouttab file with the routing rules.
@@ -48,4 +48,4 @@ Directory, where does the SAP Router reside, for *SECUDIR* variable.
 
 ### saprouter_snclib
 Location of libsapcrypto library, for *SNC_LIB* variable.
-- Default: */usr/sap/saprouter/libsapcrypto.so**
+- Default: **/usr/sap/saprouter/libsapcrypto.so**

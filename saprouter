@@ -1,0 +1,80 @@
+#!/bin/sh
+
+# PROVIDE: saprouter
+# REQUIRE: LOGIN DAEMON NETWORKING
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name=saprouter
+rcvar=${name}_enable
+pidfile="/var/run/${name}.pid"
+
+extra_commands="status"
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+status_cmd="${name}_status"
+
+#start_precmd="echo \"Starting SAPRouter\""
+#stop_postcmd="echo \"Bye-Bye\""
+
+load_rc_config ${name}
+: ${saprouter_enable="NO"}
+: ${saprouter_cn=""}
+: ${saprouter_verbosity=1}
+: ${saprouter_port=3299}
+: ${saprouter_saprouttab="/usr/saprouter/saprouttab"}
+: ${saprouter_hostname="localhost"}
+: ${saprouter_user="saprouter"}
+: ${saprouter_log="/var/log/saprouter.log"}
+: ${saprouter_directory="/usr/sap/saprouter"}
+: ${saprouter_snclib="/usr/sap/saprouter/libsapcrypto.so"}
+
+saprouter_start() {
+  if saprouter_is_running
+  then
+    echo "SAPRouter is already running!"
+  else
+    echo "Starting SAPRouter..."
+    su -m ${saprouter_user} -c "export SECUDIR=${saprouter_directory};export SNC_LIB=${saprouter_snclib};${saprouter_directory}/${name} -r -S ${saprouter_port} -K \"p:${saprouter_cn}\" -R ${saprouter_saprouttab} -V ${saprouter_verbosity} -H ${saprouter_hostname} -T ${saprouter_log} > /dev/null  &";
+
+    if saprouter_is_running
+    then
+      echo "SAPRouter has started!"
+    else
+      echo "Error has occurred when starting SAPRouter, please check ${saprouter_log} file for more details!"
+    fi
+  fi
+}
+
+saprouter_stop() {
+  if saprouter_is_running
+  then
+    echo "Stopping SAPRouter"
+    su -m ${saprouter_user} -c "${saprouter_directory}/${name} -s -H ${saprouter_hostname} > /dev/null"
+  else
+    echo "SAPRouter is already stopped!"
+  fi
+}
+
+saprouter_status() {
+  if saprouter_is_running;
+  then
+    echo "SAPRouter service is running!"
+  else
+    echo "SAPRouter service is NOT running!"
+  fi
+}
+
+saprouter_is_running() {
+  # 0 - True
+  # 1 - False
+  if ps ax | grep -v grep | grep ${saprouter_directory}/${name} > /dev/null
+  then
+    return 0
+  else
+    return 1
+  fi
+}
+
+run_rc_command "$1"
